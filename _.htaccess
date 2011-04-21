@@ -1,0 +1,109 @@
+AddDefaultCharset utf-8
+AddType text/cache-manifest .manifest
+ExpiresActive On
+ExpiresDefault "access"
+
+#change the name with your host
+<ifmodule mod_rewrite.c>
+RewriteEngine on
+RewriteCond %{HTTP_HOST} ^unsigned.it [NC]
+RewriteRule ^(.*)$ http://www.unsigned.it/$1 [L,R=301]
+
+RewriteRule ^([0-9]+)-([^./]+)\.html$ ./article\.php?pg=$1&title=$2 [L,QSA]
+RewriteRule ^([^./]+).htm$ ./page\.php?pg=$1 [L,QSA]
+RewriteRule ^([^./]+)$ ./article\.php?cat=$1 [L,QSA]
+
+</ifmodule>
+
+<Files ~ "^\.ht">
+Order allow,deny
+Deny from all
+</Files>
+<Files ~ "\.include\.php$">
+Order allow,deny
+Deny from all
+</Files>
+
+#ServerSignature Off
+
+###INIZIO SICUREZZA####
+
+### ASKAPACHE MOD_SECURITY ###
+<IfModule mod_security.c>
+ 
+# Enable ModSecurity
+SecFilterEngine On
+ 
+# Reject requests with status 403
+SecFilterDefaultAction "deny,log,status:403"
+ 
+# Some sane defaults
+SecFilterScanPOST On
+SecFilterCheckURLEncoding On
+SecFilterCheckUnicodeEncoding Off
+ 
+# Accept almost all byte values
+SecFilterForceByteRange 1 255
+ 
+# Server masking is optional
+SecServerSignature "Microsoft-IIS/5.0"
+ 
+# Designate a directory for temporary files
+# storage. It is a good idea to change the
+# value below to a private directory, just as
+# an additional measure against race conditions
+SecUploadDir /tmp
+SecUploadKeepFiles Off
+ 
+# Only record the interesting stuff
+SecAuditEngine RelevantOnly
+# Uncomment below to record responses with unusual statuses
+# SecAuditLogRelevantStatus ^5
+SecAuditLog logs/modsec_audit.log
+ 
+# You normally won't need debug logging
+SecFilterDebugLevel 0
+SecFilterDebugLog logs/modsec_debug.log
+ 
+# Only accept request encodings we know how to handle
+# we exclude GET requests from this because some (automated)
+# clients supply "text/html" as Content-Type
+SecFilterSelective REQUEST_METHOD "!^(GET|HEAD)$" chain
+SecFilterSelective HTTP_Content-Type "!(^application/x-www-form-urlencoded$|^multipart/form-data;)"
+ 
+# Do not accept GET or HEAD requests with bodies
+SecFilterSelective REQUEST_METHOD "^(GET|HEAD)$" chain
+SecFilterSelective HTTP_Content-Length "!^$"
+ 
+# Require Content-Length to be provided with
+# every POST request
+SecFilterSelective REQUEST_METHOD "^POST$" chain
+SecFilterSelective HTTP_Content-Length "^$"
+ 
+# Don't accept transfer encodings we know we don't handle
+SecFilterSelective HTTP_Transfer-Encoding "!^$"
+ 
+</IfModule>
+
+########## Begin - Rewrite rules to block out some common exploits
+#                              
+# Block out any script trying to set a mosConfig value through the URL
+RewriteCond %{QUERY_STRING} mosConfig_[a-zA-Z_]{1,21}(=|\%3D) [OR]
+# Block out any script trying to base64_encode **** to send via URL
+RewriteCond %{QUERY_STRING} base64_encode.*\(.*\) [OR]
+# Block out any script that includes a <script> tag in URL
+RewriteCond %{QUERY_STRING} (\<|%3C).*script.*(\>|%3E) [NC,OR]
+# Block out any script trying to set a PHP GLOBALS variable via URL
+RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
+# Block out any script trying to modify a _REQUEST variable via URL
+RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2}) [OR]
+# Block out any script that tries to set CONFIG_EXT (com_extcal2 issue)
+RewriteCond %{QUERY_STRING} CONFIG_EXT(\[|\%20|\%5B).*= [NC,OR]
+# Block out any script that tries to set sbp or sb_authorname via URL (simpleboard)  
+RewriteCond %{QUERY_STRING} sbp(=|\%20|\%3D) [OR]
+RewriteCond %{QUERY_STRING} sb_authorname(=|\%20|\%3D)     
+# Send all blocked request to homepage with 403 Forbidden error!
+RewriteRule ^(.*)$ index.php [F,L]
+# 
+########## End - Rewrite rules to block out some common exploits
+

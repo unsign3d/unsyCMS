@@ -1,0 +1,12 @@
+<ul id="menu_a_2livelli">
+				<li><a href="./index.php">Articoli</a>
+					<ul>
+				<li><a href="./paper">paper</a></li>
+<li><a href="./siti">siti</a></li>
+<li><a href="./progetti">progetti</a></li>
+<li><a href="./programmazione">programmazione</a></li>
+<li><a href="./altro">altro</a></li>
+<li><a href="./off+topic">off+topic</a></li>
+</ul></li><li><a href="./curriculum.htm">Su di me</a></li>
+<li><a href="./collaborazioni.htm">Collaborazioni</a></li>
+</ul>
