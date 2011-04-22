@@ -1,1 +1,12 @@
-Sooner I'll write the guide 
+Come installare l'unsycms
+
+- INSERIMENTO DEI DATI
+I dati sono contenuti tutti nel percorso /core/core.include.php e sono delle variabili del php, niente di complicato, le variabili sono autoesplicative.
+Bisogn avere un'account su disquisquis per i commenti del blog (li ho tolti dal database per una questione di leggerezza su database a causa di limitazioni imposte da alcuni provider)
+C'è inoltre un file sql schema.sql da dare in pasto a phpmyadmin o simile dove vanno inseriti i dati dell'amministratore e il prefisso di tabella inserito nel file core
+
+- INSTALLAZIONE SQL
+
+Il file schema.sql va dato in pasto a qualche client mysql, una volta fatte le query si potrà utilizzare
+
+A breve farò un'installazione più user friendly
